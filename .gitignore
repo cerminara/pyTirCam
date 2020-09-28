@@ -1,0 +1,5 @@
+*.o
+*.dep
+*.swp
+Make/darwin*
+Make/linux*
