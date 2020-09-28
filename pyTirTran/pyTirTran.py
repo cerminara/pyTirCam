@@ -38,9 +38,9 @@ from fitting import fit
 # Spectral respose as step spectral response yes (True) or not (False)
 step = False
 # Select the results provided in the technical note 
-#results = "tau_SR_ThC" # save the transmittance data of Figs5,6; 
+results = "tau_SR_ThC" # save the transmittance data of Figs5,6; 
 #results = "Fig.7" # show the plot given in Fig.7; 
-results = "Tables2-4" # compute the data reported in Tables 2-4
+#results = "Tables2-4" # compute the data reported in Tables 2-4
 
 #    Inputs
 
@@ -286,21 +286,19 @@ if (results=="tau_SR_ThC"):
     TATM=np.array([0., 5., 10., 15.])
     for tt in TATM: # TEXP=15. , EPS =1. , HUM = 50.
         [T_SR,tau_SR,T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(15.,tt, D, 1., 50.))
+        np.savetxt("FigureData/tau_50_%d_ThC.dat"%tt, np.c_[D, tau_ThC[0]], fmt="%.8f")
         if step:
             np.savetxt("FigureData/tau_50_%d_step.dat"%tt, np.c_[D, tau_SR], fmt="%.8f")
-            np.savetxt("FigureData/tau_50_%d_ThC_step.dat"%tt, np.c_[D, tau_ThC[0]], fmt="%.8f")
         else:
-            np.savetxt("FigureData/tau_50_%d_ThC.dat"%tt, np.c_[D, tau_ThC[0]], fmt="%.8f")
             np.savetxt("FigureData/tau_50_%d.dat"%tt, np.c_[D, tau_SR], fmt="%.8f")
     
     HUM=np.array([25., 50., 75., 100.])
     for hh in HUM: # TEXP = 15. , TATM = 15. , EPS = 1. 
         [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(15.,15., D, 1., hh))
+        np.savetxt("FigureData/tau_%d_15_ThC.dat"%hh, np.c_[D, tau_ThC[0]], fmt="%.8f")
         if step:
-            np.savetxt("FigureData/tau_%d_15_ThC_step.dat"%hh, np.c_[D, tau_ThC[0]], fmt="%.8f")
             np.savetxt("FigureData/tau_%d_15_step.dat"%hh, np.c_[D, tau_SR], fmt="%.8f")
         else:
-            np.savetxt("FigureData/tau_%d_15_ThC.dat"%hh, np.c_[D, tau_ThC[0]], fmt="%.8f")
             np.savetxt("FigureData/tau_%d_15.dat"%hh, np.c_[D, tau_SR], fmt="%.8f")
 elif (results == "Fig.7"):
     #    High temperature contrast
@@ -349,8 +347,8 @@ elif (results == "Fig.7"):
     plt.xlabel(r'$T_{obj}$ [$^\circ\mathrm{C}$]',fontsize=14)
     plt.savefig("tauObjOnTauAtm.png")
     plt.close()
-    print "max and min relative error at 1 km: ", (np.max(ratio1)-1.)*100., "%, ", (np.min(ratio1)-1.)*100., "%"
-    print "max and min relative error at 10 km: ", (np.max(ratio2)-1.)*100., "%, ", (np.min(ratio2)-1.)*100., "%"
+    print "tauObj max and min relative error at 1 km: ", (np.max(ratio1)-1.)*100., "%, ", (np.min(ratio1)-1.)*100., "%"
+    print "tauObj max and min relative error at 10 km: ", (np.max(ratio2)-1.)*100., "%, ", (np.min(ratio2)-1.)*100., "%"
 elif (results == "Tables2-4"):
     #    Brightness temperature data calculated by using tau_SpR and tau_ThC
     # ENT configuration camera settings
