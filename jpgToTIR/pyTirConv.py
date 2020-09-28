@@ -5,8 +5,8 @@ pyTirConv - Python script to recover the radiometric thermal data
             from compressed thermal images 
 
 Copyright (C) 2020-#### 
-               by    Matteo Cerminara EMAIL  
-               and   Benedetta Calusi EMAIL
+               by    Matteo Cerminara matteo.cerminara@ingv.it
+               and   Benedetta Calusi benedetta.calusi@ingv.it
 
 SCRIVERE QUALCOSA DEL GENERE E ADD LA LICENZA 
 
