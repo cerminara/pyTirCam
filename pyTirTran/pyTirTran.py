@@ -1,6 +1,5 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 ########################################################
-### copiato da tech_note3.py (exp_calib versione 03) ###
 ########################################################
 """
 pyTran - Python script for transmission and conversion algorithm used by commercial thermal camera 
@@ -9,12 +8,10 @@ Copyright (C) 2020-####
                by    Matteo Cerminara matteo.cerminara@ingv.it
                and   Benedetta Calusi benedetta.calusi@ingv.it
 
-SCRIVERE QUALCOSA DEL GENERE E ADD LA LICENZA 
-
 This program is free software; you can redistribute it and/or 
 modify it under the terms of the GNU General Public License 
 as published by the Free Software Foundation; either version 
-2 of the License, or (at your option) any later version.
+3 of the License, or (at your option) any later version.
 
 This program is distributed in the hope that it will be useful, 
 but WITHOUT ANY WARRANTY; without even the implied warranty of 
@@ -32,7 +29,7 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 from scipy.interpolate import PchipInterpolator
 import numpy.polynomial.polynomial as poly
-from fitting import fit
+from functions import fit
 
 #    Flags
 # Spectral respose as step spectral response yes (True) or not (False)
@@ -282,7 +279,7 @@ def TAUS(Tobj,Tatm, dist, eps, hum):
 
 if (results=="tau_SR_ThC"):
     #   Save data of tau_SpR/SpRS and tau_ThC
-    D = np.linspace(0., 10000., 2000.) 
+    D = np.linspace(0., 10000., 2000) 
     TATM=np.array([0., 5., 10., 15.])
     for tt in TATM: # TEXP=15. , EPS =1. , HUM = 50.
         [T_SR,tau_SR,T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(15.,tt, D, 1., 50.))
@@ -322,7 +319,7 @@ elif (results == "Fig.7"):
     [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(T-273.15,20., 0., 0.98, 40.))
     T2 = np.copy(T_SR)
     t2 = np.copy(tau_SR)
-    print "observed temperatures at 500 Celsius: ", T2[-1], T3[-1], T4[-1], T5[-1], T6[-1]
+    print("observed temperatures at 500 Celsius: ", T2[-1], T3[-1], T4[-1], T5[-1], T6[-1])
     
     plt.plot(T-273.15,T-273.15,'-k', label='object temperature')
     plt.plot(T-273.15,T2, '-g', label=r"$\tau_{ext} = %.2f$"%tau_ext)
@@ -347,71 +344,71 @@ elif (results == "Fig.7"):
     plt.xlabel(r'$T_{obj}$ [$^\circ\mathrm{C}$]',fontsize=14)
     plt.savefig("tauObjOnTauAtm.png")
     plt.close()
-    print "tauObj max and min relative error at 1 km: ", (np.max(ratio1)-1.)*100., "%, ", (np.min(ratio1)-1.)*100., "%"
-    print "tauObj max and min relative error at 10 km: ", (np.max(ratio2)-1.)*100., "%, ", (np.min(ratio2)-1.)*100., "%"
+    print("tauObj max and min relative error at 1 km: ", (np.max(ratio1)-1.)*100., "%, ", (np.min(ratio1)-1.)*100., "%")
+    print("tauObj max and min relative error at 10 km: ", (np.max(ratio2)-1.)*100., "%, ", (np.min(ratio2)-1.)*100., "%")
 elif (results == "Tables2-4"):
     #    Brightness temperature data calculated by using tau_SpR and tau_ThC
     # ENT configuration camera settings
     
-    print 'Table2, ENT configuration'
+    print('Table2, ENT configuration')
     TEXP=np.array([49.7, 39., 47.3])
     TATM=np.array([20., 40., 20.])
     DIST=np.array([3.047e3, 0., 3.047e3])
     EPS=np.array([0.98, 1., 0.98])
     HUM=np.array([40., 0., 40.])
-    print 'Texp' , TEXP
-    print 'Tatm' , TATM
-    print 'Dist' , DIST
-    print 'Eps' , EPS
-    print 'Hum' , HUM
+    print('Texp' , TEXP)
+    print('Tatm' , TATM)
+    print('Dist' , DIST)
+    print('Eps' , EPS)
+    print('Hum' , HUM)
     [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(TEXP,TATM, DIST, EPS, HUM))
-    print 'T_SR', T_SR
-    print 'T_ThC', T_ThC
-    print 'tau_SR', tau_SR
-    print 'tau_ThC', tau_ThC
-    print 'Robs' , Robs
-    print 'Robs_ThC', Robs_ThC
+    print('T_SR', T_SR)
+    print('T_ThC', T_ThC)
+    print('tau_SR', tau_SR)
+    print('tau_ThC', tau_ThC)
+    print('Robs' , Robs)
+    print('Robs_ThC', Robs_ThC)
     
-    print'####'
+    print('####')
     
-    print 'Table3, ENT configuration'
+    print('Table3, ENT configuration')
     TEXP=np.array([-4.5, -10, -6, 4., 4.5, -4.])
     TATM=20.
     DIST=np.array([0., 3.047e3, 3.047e3, 0., 0., 3.047e3])
     EPS = 0.98
     HUM = 40.
-    print 'Texp' , TEXP
-    print 'Tatm' , TATM
-    print 'Dist' , DIST
-    print 'Eps' , EPS
-    print 'hum', HUM
+    print('Texp' , TEXP)
+    print('Tatm' , TATM)
+    print('Dist' , DIST)
+    print('Eps' , EPS)
+    print('hum', HUM)
     [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(TEXP,TATM, DIST, EPS, HUM))
-    print 'T_SR', T_SR
-    print 'T_ThC', T_ThC
-    print 'tau_SR', tau_SR
-    print 'tau_ThC', tau_ThC
-    print 'Robs' , Robs
-    print 'Robs_ThC', Robs_ThC
+    print('T_SR', T_SR)
+    print('T_ThC', T_ThC)
+    print('tau_SR', tau_SR)
+    print('tau_ThC', tau_ThC)
+    print('Robs' , Robs)
+    print('Robs_ThC', Robs_ThC)
     
-    print'####'
+    print('####')
     
-    print 'Table4, ENT configuration'
+    print('Table4, ENT configuration')
     TEXP=np.array([-5.3, 4.3, 4.7, 5., -0.3, -0.3, -3.8, -13., -0.2])
     TATM = 20.
     DIST=np.array([3.047e3, 0., 0., 0., 0., 0., 3.047e3, 3.047e3, 0.])
     EPS=np.array([0.98, 0.98, 0.98, 1., 0.98, 0.98, 0.98, 0.98, 1.])
     HUM=np.array([40., 40., 40., 40., 40., 0., 0., 40., 40.])
-    print 'Texp' , TEXP
-    print 'Tatm', TATM
-    print 'Dist' , DIST
-    print 'Eps' , EPS
-    print 'Hum' , HUM
+    print('Texp' , TEXP)
+    print('Tatm', TATM)
+    print('Dist' , DIST)
+    print('Eps' , EPS)
+    print('Hum' , HUM)
     [T_SR,tau_SR,T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(TEXP,TATM, DIST, EPS, HUM))
-    print 'T_SR', T_SR
-    print 'T_ThC', T_ThC
-    print 'tau_SR', tau_SR
-    print 'tau_ThC', tau_ThC
-    print 'Robs' , Robs
-    print 'Robs_ThC', Robs_ThC
+    print('T_SR', T_SR)
+    print('T_ThC', T_ThC)
+    print('tau_SR', tau_SR)
+    print('tau_ThC', tau_ThC)
+    print('Robs' , Robs)
+    print('Robs_ThC', Robs_ThC)
     
-    print '####'
+    print('####')
