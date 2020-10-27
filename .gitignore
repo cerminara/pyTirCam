@@ -2,5 +2,6 @@
 *.dep
 *.swp
 *.DS_Store
+*.pyc
 Make/darwin*
 Make/linux*
