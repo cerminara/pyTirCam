@@ -40,7 +40,7 @@ evalConv = True
 evalRadio = False
 load = False
 
-exec(open("inputSawyer.py").read())
+exec(open("input.py").read())
 
 
 ###--- Execute jobs
