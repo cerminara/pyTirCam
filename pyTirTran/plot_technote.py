@@ -82,6 +82,7 @@ ax.set_xlim(left = 0 , right = 1000)
 ax.set_ylim(bottom = 0.8 , top = 1)
 ax.grid()
 ax.legend()
+plt.title('ThC vs SpR model, humidity 50%')
 plt.show()
 
 #plot tau SpR temp=15
@@ -101,6 +102,7 @@ ax4.set_xlim(left = 0 , right = 1000)
 ax4.set_ylim(bottom = 0.7 , top = 1)
 ax4.grid()
 ax4.legend()
+plt.title('ThC vs SpR model, temperature 15 C')
 plt.show()
 
 #plot tau SpRS hum=50
@@ -120,6 +122,7 @@ ax.set_xlim(left = 0 , right = 1000)
 ax.set_ylim(bottom = 0.8 , top = 1)
 ax.grid()
 ax.legend()
+plt.title('ThC vs SpRS model, humidity 50%')
 plt.show()
 
 #plot tau SpRS temp=15
@@ -139,6 +142,7 @@ ax4.set_xlim(left = 0 , right = 1000)
 ax4.set_ylim(bottom = 0.7 , top = 1)
 ax4.grid()
 ax4.legend()
+plt.title('ThC vs SpRS model, temperature 15 C')
 plt.show()
 
 #plot comparison until d=10000, temp=0, hum=50
@@ -152,6 +156,7 @@ ax6.legend()
 ax6.set_ylabel(r'$\tau$ [-]',fontsize=14)#, fontproperties=font)
 ax6.set_xlabel('d [m]',fontsize=14)
 ax6.set_xlim(left = 0 , right = 10000)
+plt.title('ThC vs SpR and SpRS model, temperature 0 C, humidity 50%')
 plt.show()
 
 #plot comparison until d=10000, temp=15, hum=50
@@ -165,5 +170,6 @@ ax2.legend()
 ax2.set_ylabel(r'$\tau$ [-]',fontsize=14)#, fontproperties=font)
 ax2.set_xlabel('d [m]',fontsize=14)
 ax2.set_xlim(left = 0 , right = 10000)
+plt.title('ThC vs SpR and SpRS model, temperature 15 C, humidity 50%')
 plt.show()
 

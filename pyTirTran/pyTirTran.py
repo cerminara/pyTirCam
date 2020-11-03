@@ -29,91 +29,55 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 from scipy.interpolate import PchipInterpolator
 import numpy.polynomial.polynomial as poly
-from functions import fit
+# import functions
+from functions import *
 
-#    Flags
+###--- Flags
 # Spectral respose as step spectral response yes (True) or not (False)
 step = False
 # Select the results provided in the technical note 
-results = "tau_SR_ThC" # save the transmittance data of Figs5,6; 
+#results = "tau_SR_ThC" # save the transmittance data of Figs5,6; 
 #results = "Fig.7" # show the plot given in Fig.7; 
-#results = "Tables2-4" # compute the data reported in Tables 2-4
+results = "Tables2-4" # compute the data reported in Tables 2-4
 
-#    Inputs
+###--- Inputs
 
-# Temperaure range K
-len_T = 1000 
-Tmin = 273.15 # -10. + 273.15
-Tmax = 500. + 273.15
-T = np.linspace(Tmin,Tmax,len_T)
-TT = np.reshape(T, (1, len_T))
-Tmax_fit = Tmax
-# 400 ppm (molar fraction)
-rhoCO2 = 0.775e-3
-# max of the spectral response 
-SpR_max = 0.82
-# Define domain of the spectral spectral respose as step function  
-lambda_min = 7.5*1e-6
-lambda_max = 13.*1e-6
-# Camera-object distance (in the technical note is named d)
-L = 3.e+03
+exec(open("input.py").read())
+
 # External optics transmittance
 if (results == "Tables2-4") or (results == "tau_SR_ThC"):
     tau_ext = 1.0
 elif (results == "Fig.7"):
-    tau_ext = np.array([1.0,0.86])
+    tau_ext = np.array([1.0,tauext])
 # Load the H2O and CO2 absorption coefficients 
 # wavelength data is based on H2O wavelength data 
-fileIn_gasdataH2O = '../spectralData/h2o_conv.dat'
 data_gd_H2O = np.genfromtxt(fileIn_gasdataH2O)
 x = data_gd_H2O[:,0]*1e-6
 len_gd = len(x)
 xx = np.reshape(x, (len_gd,1))
 Ah2o = np.reshape(data_gd_H2O[:,1], (len_gd, 1))
 
-fileIn_gasdataCO2 = '../spectralData/co2_conv.dat'
 data_gd_CO2 = np.genfromtxt(fileIn_gasdataCO2)
 Aco2 = np.reshape(data_gd_CO2[:,1], (len_gd, 1))
 
-# Define of saturation pressure of water
-# Pascal
-a = 611.21
-# non-dim
-b = 17.966
-# Celsius
-c= 247.15
-# J/(kg K)
-Rw = 462.
-def ps(temp):
-    """
-    This definition provides the saturation pressure of water
-    """
-    return a*np.exp(b*temp/(c+temp))
 
-# ThC coefs of the transmittance formula given in Eq. (B1)
-K_atm = 1.9
-alpha1 = 0.0066
-alpha2 = 0.0126
-beta1 = -0.0023
-beta2 = -0.0067
-h1 = 1.5587
-h2 = 6.939e-02
-h3 = -2.7816e-04
-h4 = 6.8455e-07
+# contruct temperature
+T = np.linspace(Tmin,Tmax,len_T)
+TT = np.reshape(T, (1, len_T))
 
-# Check Stefan-Boltzmann law 
-hC = 0.6626068e-33
-cC = 299792458.
-k_B = 0.13806503e-22
-sigma = 5.6704e-8
-CT = hC*cC/(xx*k_B)
-CI = (2.*hC*cC**2)/((xx)**5)
-B = CI/(np.exp(CT/TT) - 1.)
-# R_BB = np.trapz(B, x=xx2, axis=0)
-# R_StBo = sigma*T**4/np.pi 
+# Stefan-Boltzmann law 
+## Check
+#sigma = 5.6704e-8
+#x2 = np.linspace(0.01*lambda_min, 1000.*lambda_max, len_gd*3)
+#xx2 = np.reshape(x2, (len_gd*3,1))
+#B = Boltz(xx2, TT)
+#R_BB = np.trapz(B, x=xx2, axis=0)
+#R_StBo = sigma*T**4/np.pi 
+#plt.plot(T, R_BB/R_StBo - 1.)
+#plt.show()
+#exit()
 
 # Load spectral response 
-fileIn_SpR = '../spectralData/sr_calibrated.dat'
 data_SpR = np.genfromtxt(fileIn_SpR)
 XSpR = data_SpR[:,0]*1e-6
 YSpR = SpR_max*data_SpR[:,1]
@@ -124,12 +88,7 @@ SpR = IX(x)
 #plt.show()
 
 # Define spectral response as step function 
-indx_SpRS = np.where((x >= lambda_min) & (x <= lambda_max))
-SpRS_eq_1 = np.ones(len(indx_SpRS[0]))
-SpRS_eq_0i = np.zeros(indx_SpRS[0][0]-1)
-SpRS_eq_0f = np.zeros(len_gd - indx_SpRS[0][-1])
-SpRS = np.append(SpRS_eq_0i,SpRS_eq_1)
-SpRS = np.append(SpRS,SpRS_eq_0f)
+SpRS = Step(x, lambda_min, lambda_max, len_gd)
 #plt.plot(x,SpRS)
 #plt.show()
 
@@ -141,24 +100,17 @@ else:
 
 #    Fitting procedure to approximate radiance and brightness temperature 
 # Radiance based on black-body theory
-R = np.trapz(SR*B, x=xx, axis=0)
-
+R = TtoR(xx, TT, SR)
+# fit radiance as a function of temperature
 ii = np.where(T < Tmax_fit)
 coefs, stats = poly.polyfit(T[ii], R[ii], 4, full=True) # coefs begin from index zero 
 R_fit = poly.polyval(T,coefs)
-
-def T_func(r, a, b, c, d):
-    """
-    This definition provides the approximation of the brightness temperature 
-    as combination of a power law and a linear function 
-    """
-    return a*np.power(r, b) + c + d*r
-
+# fit temperature as a function of radiance
 popt, pcov, sigma, r2 = fit(T_func, R[ii], T[ii], p0=[67.7,0.28,94.0,0.196])
 T_fit = T_func(R, *popt)
 
-
 #    Transmission and conversion definitions 
+
 def TAU_R(Tobj,Tatm, dist, eps, hum):
     """
     This definition from the input:
@@ -193,23 +145,16 @@ def TAU_R(Tobj,Tatm, dist, eps, hum):
             eps = np.reshape(eps, (1, lenT))
         if np.size(hum) > 1:
             hum = np.reshape(hum, (1, lenT))
-    Bobj = CI/(np.exp(CT/Tobj) - 1.)
-    Robj = np.trapz(SR*Bobj, x=xx, axis=0)
-    Batm = CI/(np.exp(CT/Tatm) - 1.)
-    Ratm = np.trapz(SR*Batm, x=xx, axis=0)
-    PS = ps(Tatm-273.15)
-    dens = hum/100.*PS/(Rw*Tatm)
-    Ktot = dens*Ah2o + rhoCO2*Aco2
-    taua = np.trapz(SR*Batm*np.exp(-(dens*Ah2o + rhoCO2*Aco2)*dist), x=xx, axis=0)/(np.trapz(SR*Batm, x=xx, axis=0))
-    ww = hum*1e-02*np.exp(h1+h2*(Tatm-273.15)+h3*(Tatm-273.15)**2+h4*(Tatm-273.15)**3) # here Tatm in Celsius degree
-    tau_ThC1 = K_atm*np.exp(-np.sqrt(dist)*(alpha1+beta1*np.sqrt(ww)))
-    tau_ThC2 = (1.-K_atm)*np.exp(-np.sqrt(dist)*(alpha2+beta2*np.sqrt(ww)))
-    tau_ThC = tau_ThC1 + tau_ThC2
+    Robj = TtoR(xx, Tobj, SR)
+    Ratm = TtoR(xx, Tatm, SR)
+    dens = rhow(hum, Tatm)
+    taua = tauA([dens, rhoCO2], [Ah2o, Aco2], dist, xx, Tatm, SR)
+    tau_ThC = tauThC(hum, Tatm, dist)
     return [taua,tau_ThC,Robj,Ratm,Tobj,Tatm,eps]
 
 def Ttot(out_TAU_R):
     """
-    The input of this definition is input the output of def TAU_R to compute the observed radiance 
+    The input of this definition is the output of TAU_R, to compute the observed radiance 
 
     Robs        - [Watt/meters^2]
     Robs_ThC    - [Watt/meters^2]
@@ -224,8 +169,8 @@ def Ttot(out_TAU_R):
     Tobj = out_TAU_R[4]
     Tatm = out_TAU_R[5]
     eps = out_TAU_R[6]
-    Robs = tau_ext*(eps*taua*Robj + (1. - eps)*taua*Ratm + (1. - taua)*Ratm) + (1.- tau_ext)*Ratm
-    Robs_ThC = tau_ext*(eps*tau_ThC*Robj + (1. - eps)*tau_ThC*Ratm + (1. - tau_ThC)*Ratm) + (1.- tau_ext)*Ratm
+    Robs = Rtot(Robj, Ratm, taua, tau_ext, eps)
+    Robs_ThC = Rtot(Robj, Ratm, tau_ThC, tau_ext, eps)
     return [T_func(Robs, *popt) - 273.15, taua, T_func(Robs_ThC, *popt) - 273.15, tau_ThC, Robs, Robs_ThC]
 
 
@@ -265,15 +210,9 @@ def TAUS(Tobj,Tatm, dist, eps, hum):
             eps = np.reshape(eps, (1, lenT))
         if np.size(hum) > 1:
             hum = np.reshape(hum, (1, lenT))
-    Bobj = CI/(np.exp(CT/Tobj) - 1.)
-    Robj = np.trapz(SR*Bobj, x=xx, axis=0)
-    Batm = CI/(np.exp(CT/Tatm) - 1.)
-    Ratm = np.trapz(SR*Batm, x=xx, axis=0)
-    PS = ps(Tatm-273.15)
-    dens = hum/100.*PS/(Rw*Tatm)
-    Ktot = dens*Ah2o + rhoCO2*Aco2
-    taua = np.trapz(SR*Batm*np.exp(-(dens*Ah2o + rhoCO2*Aco2)*dist), x=xx, axis=0)/(np.trapz(SR*Batm, x=xx, axis=0))
-    tauo = np.trapz(SR*Bobj*np.exp(-(dens*Ah2o + rhoCO2*Aco2)*dist), x=xx, axis=0)/(np.trapz(SR*Bobj, x=xx, axis=0))
+    dens = rhow(hum, Tatm)
+    taua = tauA([dens, rhoCO2], [Ah2o, Aco2], dist, xx, Tatm, SR)
+    tauo = tauA([dens, rhoCO2], [Ah2o, Aco2], dist, xx, Tobj, SR)
     ratio = tauo/taua
     return [taua,tauo,ratio]
 
@@ -319,7 +258,7 @@ elif (results == "Fig.7"):
     [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(T-273.15,20., 0., 0.98, 40.))
     T2 = np.copy(T_SR)
     t2 = np.copy(tau_SR)
-    print("observed temperatures at 500 Celsius: ", T2[-1], T3[-1], T4[-1], T5[-1], T6[-1])
+    print("observed temperatures when object is at 500 Celsius: ", T2[-1], T3[-1], T4[-1], T5[-1], T6[-1])
     
     plt.plot(T-273.15,T-273.15,'-k', label='object temperature')
     plt.plot(T-273.15,T2, '-g', label=r"$\tau_{ext} = %.2f$"%tau_ext)
