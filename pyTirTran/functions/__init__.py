@@ -31,7 +31,16 @@ def fit(f, xdata, ydata, p0=None, sigma=None, absolute_sigma=False, check_finite
 def ps(temp):
     """
     This function provides the saturation pressure of water
-    Temperature "temp" in Celsius.
+
+    Input:
+
+    temp         - temperature [Celsius]
+
+    Output:
+
+    ps           - water vapour saturation pressure [Pa]
+
+
     """
     # Pascal
     a = 611.21
@@ -45,14 +54,34 @@ def ps(temp):
 
 def rhow(hum, T):
     """
-    Water vapour bulk density
+    This function provides the water vapour bulk density
+
+    Input:
+
+    hum          - relative humidity [%]
+    T            - temperature [K]
+
+    Output:
+
+    rhow         - water vapour bulk density [kg/m^3]
+    
     """
     Rw = 462.
     return hum/100.*ps(T-273.15)/(Rw*T)
 
 def rhowThC(hum, T):
     """
-    Water vapour bulk density in g/m3 from the ThC empirical model
+    Water vapour bulk density in g/m^3 from the ThC empirical model
+
+    Input:
+
+    hum          - relative humidity [%]
+    T            - temperature [K]
+
+    Output:
+
+    rhow         - water vapour bulk density [g/m^3]
+
     """
     h1 = 1.5587
     h2 = 6.939e-02
@@ -63,6 +92,16 @@ def rhowThC(hum, T):
 def Boltz(x, T):
     """
     Stefan-Boltzmann law
+
+    Input:
+
+    x            - wavelength [meters]
+    T            - temperature [K]
+
+    Output:
+
+    B            - Black body spectral radiance [W/(m^3 sr)]
+
     """
     hC = 0.6626068e-33
     cC = 299792458.
@@ -73,7 +112,19 @@ def Boltz(x, T):
 
 def Step(x, lambda_min, lambda_max, len_gd):
     """
-    Define spectral response as step function 
+    Spectral response as step function.
+
+    Input:
+
+    x            - wavelength [meters]
+    lambda_min   - minimum wavelength of the step function [meters]
+    lambda_max   - minimum wavelength of the step function [meters]
+    len_gd       - length of the wavelengh space [-]
+
+    Output:
+
+    SpRS         - Step function spectral response [-]
+
     """
     indx_SpRS = np.where((x >= lambda_min) & (x <= lambda_max))
     SpRS_eq_1 = np.ones(len(indx_SpRS[0]))
@@ -83,8 +134,8 @@ def Step(x, lambda_min, lambda_max, len_gd):
     return np.append(SpRS_i,SpRS_eq_0f)
 
 
-### arrived here. I need to try to call this RIR
-def TtoR(xx, T, SR):
+### arrived here. I need to finish function comments
+def RIR(xx, T, SR):
     """
     Given temperature T and wavelength x,
     beside spectral response SR,
