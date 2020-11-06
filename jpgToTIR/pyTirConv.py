@@ -35,46 +35,45 @@ from functions import *
 
 
 ###---   Flags
-analytic = False
+load = True
 evalConv = True
-evalRadio = False
-load = False
+evalRadio = True
+analytic = True
 
 exec(open("input.py").read())
 
 
-###--- Execute jobs
+###--- Main ---###
 
-# Open image with colorbar in RGB mode 
+## Open image with colorbar in RGB mode 
 im_tot = Image.open(FILE)
 imarr_tot = np.array(im_tot)
-#w, h = im_tot.size
+# w, h = im_tot.size
 # print 'w , h image size ' , w, h
 imarr_cut = imarr_tot[hi:hf, wi:wf, :] # selected zone 
 
 
-# Define colors from image colorbar
+## Define colors from image colorbar
 temp, COLORBAR = fromJpgToBar(FILE, [Tmin, Tmax], [bar_wi, bar_wf, bar_hi, bar_hf])
 
 
-#    Find the closest color for the whole image or selected image zone
+## Load existing converted data or execute a new conversion
 
 if load:
   Tarr = np.genfromtxt('Temperature.dat')
   im_out = Image.open('OutputImage.jpg')
-  imarr_out = np.array(im_out)
 else:
   [Tarr, imarr_out] = fromJpgToArray(FILE, [wi, wf, hi, hf], temp, COLORBAR)
   np.savetxt('Temperature.dat', Tarr, fmt="%.8f")
   im_out = Image.fromarray(imarr_out)
   im_out.save('OutputImage.jpg')
 
+## Save the image showing the difference between the input and the recovered data colors
 if evalConv:
-  #    Plot diff image 
   difference = ImageChops.difference(Image.fromarray(imarr_cut), im_out)
   difference.save('difference.jpg')
 
-###---    Compute the absolute error between the radiometric and the recovered data
+## Compute the absolute error between the radiometric and the recovered data
 if evalRadio:
   # Load the radiometric data  
   data = np.genfromtxt('InputData.dat')
@@ -101,7 +100,7 @@ if evalRadio:
 
 
 
-
+## Computations with the analytic colorbar
 if analytic:
   # Define colors from analytic colorbar 
   avga = analyticBar(temp)[1]
@@ -127,20 +126,30 @@ if analytic:
   leg = ax.legend()
   plt.show()
 
+  ## Load existing converted data or execute a new conversion
   if load:
     Tarr_analytic = np.genfromtxt('Temperature_analytic.dat')
+    im_analytic = Image.open('OutputImage_analytic.jpg')
   else:
     [Tarr_analytic, imarr_analytic] = fromJpgToArray("InputImage.jpg", [wi, wf, hi, hf], temp, COLORANALYTIC)
     np.savetxt('Temperature_analytic.dat', Tarr_analytic, fmt="%.8f")
     im_analytic = Image.fromarray(imarr_analytic)
     im_analytic.save('OutputImage_analytic.jpg')
 
+  ## Save the image showing the difference between the input and the recovered data colors
+  if evalConv:
+    difference = ImageChops.difference(Image.fromarray(imarr_cut), im_analytic)
+    difference.save('difference_analytic.jpg')
+
+  ## Compute the absolute error between the radiometric and the recovered data
   if evalRadio:
 
+    # error in the selected area
     AbsErr_analytic = np.abs(Tarr_analytic - data_cut)
     print('#### Image selected area: Absolute error = (max, avg, min) Celsius')
     print('With analytical colorbar: ' , (np.max(AbsErr_analytic) , np.average(AbsErr_analytic), np.min(AbsErr_analytic)))
-    # Comparison of the absolute errors
+    #    Plot absolute error 
+    # Absolute error of the recovered data with analytical colorbar
     col_map = 'RdBu_r'
     fig, axs = plt.subplots(1, 2)
     im1 = axs[0].imshow(AbsErr, norm=LogNorm(vmin=0.1, vmax=5.), cmap=col_map)

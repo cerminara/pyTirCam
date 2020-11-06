@@ -27,6 +27,23 @@ def fit(f, xdata, ydata, p0=None, sigma=None, absolute_sigma=False, check_finite
   r2 = 1. - ss_res/ss_tot
   return popt, pcov, chi, r2
 
+def T_func(r, a, b, c, d):
+    """
+    This function provides the approximation of the brightness temperature
+    as a function of the radiance, and
+    as combination of a power law and a linear function.
+
+    Input:
+
+    r            - radiance [W/(m^2 sr)]
+    a, b, c, d   - fitting parameters [SI]
+
+    Output:
+
+    T            - brightness temperature [K]
+
+    """
+    return a*np.power(r, b) + c + d*r
 
 def ps(temp):
     """
@@ -89,9 +106,9 @@ def rhowThC(hum, T):
     h4 = 6.8455e-07
     return hum*1e-02*np.exp(h1+h2*(T-273.15)+h3*(T-273.15)**2+h4*(T-273.15)**3)
 
-def Boltz(x, T):
+def Planck(x, T):
     """
-    Stefan-Boltzmann law
+    Planck function.
 
     Input:
 
@@ -109,6 +126,26 @@ def Boltz(x, T):
     CT = hC*cC/(x*k_B)
     CI = (2.*hC*cC**2)/((x)**5)
     return CI/(np.exp(CT/T) - 1.)
+
+def RIR(xx, T, SR):
+    """
+    Given temperature and wavelength,
+    beside the camera spectral response,
+    the function gives the radiance measured by the camera,
+    according to Eq. (5)
+
+    Input:
+
+    xx           - wavelength [meters]
+    T            - temperature [K]
+    SR           - spectral response [-]
+
+    Output:
+
+    R            - radiance [W/(m^2 sr)]
+
+    """
+    return np.trapz(SR*Planck(xx, T), x=xx, axis=0)
 
 def Step(x, lambda_min, lambda_max, len_gd):
     """
@@ -133,27 +170,48 @@ def Step(x, lambda_min, lambda_max, len_gd):
     SpRS_i = np.append(SpRS_eq_0i,SpRS_eq_1)
     return np.append(SpRS_i,SpRS_eq_0f)
 
-
-### arrived here. I need to finish function comments
-def RIR(xx, T, SR):
-    """
-    Given temperature T and wavelength x,
-    beside spectral response SR,
-    the function convets into radiance
-    """
-    return np.trapz(SR*Boltz(xx, T), x=xx, axis=0)
-
-def T_func(r, a, b, c, d):
-    """
-    This definition provides the approximation of the brightness temperature 
-    as combination of a power law and a linear function 
-    """
-    return a*np.power(r, b) + c + d*r
-
 #    Transmission and conversion definitions 
+def tauA(rhoi, Ai, dist, xx, T, SR):
+    """
+    Atmospheric transmittance, obtained using spectral properties of
+    the atmospheric gases and of the camera sensor, SpR/SpRS, Eq. (10). 
+
+    Input:
+
+    rhoi         - array of gas components bulk densities [kg/meters^3]
+    Ai           - array of gas components specific absorption coefficient
+    dist         - camera-to-object distance [meters]
+    xx           - wavelength [meters]
+    T            - temperature [K]
+    SR           - spectral response [-]
+
+    Output:
+
+    tau          - atmopheric transmittance [-]
+
+    """
+    len_i = len(rhoi)
+    Ktot = 0.
+    for i in range(len_i):
+        Ktot += rhoi[i]*Ai[i]
+    B = Planck(xx, T)
+    return np.trapz(SR*B*np.exp(-Ktot*dist), x=xx, axis=0)/np.trapz(SR*B, x=xx, axis=0)
+
 def tauThC(hum, T, dist):
     """
-    Atmospheric transmittance as given by the ThC model
+    Atmospheric transmittance as given by the empirical 
+    algorithm of the thermal camera, ThC, Eq. (B1).
+
+    Input:
+
+    hum          - relative humidity [%]
+    T            - temperature [K]
+    dist         - camera-to-object distance [meters]
+
+    Output:
+
+    tau          - atmopheric transmittance [-]
+
     """
     # ThC coefs of the transmittance formula given in Eq. (B1)
     K_atm = 1.9
@@ -165,21 +223,24 @@ def tauThC(hum, T, dist):
     tau_ThC2 = (1.-K_atm)*np.exp(-np.sqrt(dist)*(alpha2+beta2*np.sqrt(rhowThC(hum, T))))
     return tau_ThC1 + tau_ThC2
 
-def tauA(rhoi, Ai, dist, xx, T, SR):
-    """
-    rhoi         - array of components bulk densities
-    Ai           - array of components specific absorption coefficient
-    dist         - camera-to-object distance [m]
-    xx           - wavelength
-    T            - temperature [K]
-    SR           - spectral response
-    """
-    len_i = len(rhoi)
-    Ktot = 0.
-    for i in range(len_i):
-        Ktot += rhoi[i]*Ai[i]
-    B = Boltz(xx, T)
-    return np.trapz(SR*B*np.exp(-Ktot*dist), x=xx, axis=0)/np.trapz(SR*B, x=xx, axis=0)
-
 def Rtot(Robj, Ratm, taua, tau_ext, eps):
+    """
+    Radiance received by the thermal camera, keeping into account:
+    the object emissivity; the absorption and emission of the atmophere 
+    and of the external optics, in the camera spectral range.
+
+    Input:
+
+    Robj         - radiance of the object [W/(m^2 sr)]
+    Ratm         - radiance of the atmosphere [W/(m^2 sr)]
+    taua         - atmopheric transmittance [-]
+    tau_ext      - external optics transmittance [-]
+    eps          - object emissivity [-]
+
+    Output:
+
+    Rtot         - radiance of received by the camera [W/(m^2 sr)]
+
+
+    """
     return tau_ext*(eps*taua*Robj + (1. - eps)*taua*Ratm + (1. - taua)*Ratm) + (1.- tau_ext)*Ratm

@@ -5,7 +5,18 @@ import time
 
 def closest_color(rgb, colors):
     """
-    Definition: Closest color
+    Given the rgb tuple and the colors tuple array, this function
+    finds the color in colors closest to rgb.
+
+    Input:
+
+    rgb          - (r, g, b) tuple
+    colors       - array of rgb tuples in the colorbar
+
+    Output:
+
+    the index of the color in the colorbar closest to rgb
+
     """
     r, g, b = rgb
     nColors = len(colors[:, 0])
@@ -17,7 +28,17 @@ def closest_color(rgb, colors):
 
 def analyticBar(xT):
     """
-    Definition: Analytical colorbar
+    Defines the rgb values of a specific color bar.
+
+    Input:
+
+    xT           - array of the colorbar temperature values
+
+    Output:
+
+    xT           - array of the colorbar temperature values
+    rgb          - color tuple corresponding to each temperature in xT
+
     """
     T1 = -10.
     T2 = 0.
@@ -62,6 +83,21 @@ def analyticBar(xT):
 
 
 def fromJpgToBar(FileName, TBound, barBound):
+    """
+    Extract the rgb values of the image colorbar.
+
+    Input:
+
+    FileName     - name of the image file
+    TBound       - [minimum, maximum] colorbar temperature
+    barBound     - bounds pixel coordinates [bar_wi, bar_wf, bar_hi, bar_hf]
+
+    Output:
+
+    temp         - array of the colorbar temperature values
+    avg          - color tuple corresponding to each temperature in xT
+
+    """
 
     im_tot = Image.open(FileName)
     imarr_tot = np.array(im_tot)
@@ -83,6 +119,24 @@ def fromJpgToBar(FileName, TBound, barBound):
 
 
 def fromJpgToArray(FileName, imBound, temp, COLORS):
+    """
+    Extract the temperature values from the compressed image.
+
+    Input:
+
+    FileName     - name of the image file
+    imBound      - bounds pixel coordinates [wi, wf, hi, hf]
+    temp         - array of the colorbar temperature values
+    COLORS       - color tuple corresponding to each temperature in temp
+
+    Output:
+
+    Tarr         - recovered temperature matrix
+    imarr_out    - rgb matrix corresponding to Tarr
+
+    The function prints into the standard output the time needed to convert.
+
+    """
 
     start_time = time.time()
 

@@ -1,7 +1,7 @@
 # Temperaure range K
-len_T = 1000 
-Tmin = 273.15 # -10. + 273.15
+Tmin = 273.15
 Tmax = 500. + 273.15
+len_T = 1000 
 Tmax_fit = Tmax
 # 400 ppm (molar fraction)
 rhoCO2 = 0.775e-3

@@ -31,14 +31,14 @@ from scipy.interpolate import PchipInterpolator
 import numpy.polynomial.polynomial as poly
 from functions import *
 
+### --- Select the results provided in the technical note  --- ###
+## Spectral respose as step spectral response yes (True) or not (False)
+step = False
+
 ### --- Flags --- ###
 #results = "tau_SR_ThC" # save the transmittance data of Figs5,6; 
 #results = "Fig.7" # show the plot given in Fig.7; 
 results = "Tables2-4" # compute the data reported in Tables 2-4
-
-### --- Select the results provided in the technical note  --- ###
-## Spectral respose as step spectral response yes (True) or not (False)
-step = False
 
 ###--- Inputs
 
@@ -70,7 +70,7 @@ TT = np.reshape(T, (1, len_T))
 #sigma = 5.6704e-8
 #x2 = np.linspace(0.01*lambda_min, 1000.*lambda_max, len_gd*3)
 #xx2 = np.reshape(x2, (len_gd*3,1))
-#B = Boltz(xx2, TT)
+#B = Planck(xx2, TT)
 #R_BB = np.trapz(B, x=xx2, axis=0)
 #R_StBo = sigma*T**4/np.pi 
 #plt.plot(T, R_BB/R_StBo - 1.)
@@ -98,6 +98,7 @@ if step:
 else:
     SR = np.reshape(SpR, (len_gd, 1))
 
+
 ## Fitting procedure to approximate radiance and brightness temperature 
 ## Radiance based on black-body theory
 Rir = lambda Tx: RIR(xx, Tx, SR)
@@ -106,8 +107,8 @@ R = Rir(TT)
 ii = np.where(T < Tmax_fit)
 coefs, stats = poly.polyfit(T[ii], R[ii], 4, full=True) # coefs begin from index zero 
 R_fit = lambda Tx: poly.polyval(Tx,coefs)
-## Here we choose Rir for better accuracy
-TtoR = Rir
+## Here choose Rir for better accuracy, or R_fit for better efficiency
+TtoR = Rir  # R_fit
 ## Fit of temperature as a function of radiance
 popt, pcov, sigma, r2 = fit(T_func, R[ii], T[ii], p0=[67.7,0.28,94.0,0.196])
 T_fit = lambda Rx: T_func(Rx, *popt)
@@ -117,14 +118,14 @@ RtoT = T_fit
 
 def TAU_R(Tobj,Tatm, dist, eps, hum):
     """
-    Inputs:
+    Input:
 
     Tobj, Tatm   - object and atmospheric temperature [Celsius]
     dist         - distance from object [meters]
     eps          - emissivity [-]
     hum          - humidity [-]
     
-    Outputs: 
+    Output: 
     
     taua         - atmospheric transmittance using camera spectral response
                    and the HITRAN database: Eq. (10), SpR/SpRS [-]
@@ -165,7 +166,7 @@ def Ttot(out_TAU_R):
     by using Eq. (16) with taua and tau_ThC, respectively, 
     and the corresponding temperature object by means of RtoT [Celsius]. 
 
-    Outputs:
+    Output:
 
     Tobs        - Observed temperature with SpR/SpRS atmospheric models [Celsius]
     Tobs_ThC    - Observed temperature with ThC atmospheric model [Celsius]
@@ -192,14 +193,14 @@ def TAUS(Tobj,Tatm, dist, eps, hum):
     This function checks the atmospheric transmission approximation given in Eq. (10)
     [tau(Tobj) approx as tau(Tatm)].
 
-    Inputs:
+    Input:
 
     Tobj, Tatm   - object and atmospheric temperature [Celsius]
     dist         - distance from object [meters]
     eps          - emissivity [-]
     hum          - relative humidity [-]
 
-    Outputs:
+    Output:
 
     taua         - tau(Tatm), atmospheric transmittance at Tatm, SpR/SpRS [-]
     tauo         - tau(Tobj), atmospheric transmittance at Tobj, SpR/SpRS [-]
