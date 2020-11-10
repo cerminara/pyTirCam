@@ -3,7 +3,7 @@ Tmin = 273.15
 Tmax = 500. + 273.15
 len_T = 1000 
 Tmax_fit = Tmax
-# 400 ppm (molar fraction)
+# 400 ppmv (molar fraction)
 rhoCO2 = 0.775e-3
 # max of the spectral response 
 SpR_max = 0.82
@@ -16,8 +16,8 @@ L = 3.e+03
 tauext = 0.86
 # Load the H2O and CO2 absorption coefficients 
 # wavelength data is based on H2O wavelength data 
-fileIn_gasdataH2O = '../spectralData/h2o_conv.dat'
-fileIn_gasdataCO2 = '../spectralData/co2_conv.dat'
+fileIn_gasdataH2O = 'spectralData/h2o_conv.dat'
+fileIn_gasdataCO2 = 'spectralData/co2_conv.dat'
 # Spectral response file
 fileIn_SpR = '../spectralData/sr_calibrated.dat'
 

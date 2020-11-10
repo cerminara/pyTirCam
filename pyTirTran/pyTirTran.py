@@ -37,7 +37,7 @@ step = False
 
 ### --- Flags --- ###
 #results = "tau_SR_ThC" # save the transmittance data of Figs5,6; 
-#results = "Fig.7" # show the plot given in Fig.7; 
+#results = "Fig.8" # show the plot given in Fig.8; 
 results = "Tables2-4" # compute the data reported in Tables 2-4
 
 ###--- Inputs
@@ -47,7 +47,7 @@ exec(open("input.py").read())
 ## External optics transmittance
 if (results == "Tables2-4") or (results == "tau_SR_ThC"):
     tau_ext = 1.0
-elif (results == "Fig.7"):
+elif (results == "Fig.8"):
     tau_ext = np.array([1.0,tauext])
 
 ## Load the H2O and CO2 absorption coefficients 
@@ -258,7 +258,7 @@ if (results=="tau_SR_ThC"):
 #
 # Variation of the observed temperature due to atmosphere and ext. optics
 #
-elif (results == "Fig.7"):
+elif (results == "Fig.8"):
     tau_ext_aus = np.copy(tau_ext)
     tau_ext = tau_ext[0]
     [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(T-273.15,20., 1e3, 0.98, 40.))
