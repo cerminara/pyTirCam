@@ -37,8 +37,8 @@ step = False
 
 ### --- Flags --- ###
 #results = "tau_SR_ThC" # save the transmittance data of Figs5,6; 
-#results = "Fig.8" # show the plot given in Fig.8; 
-results = "Tables2-4" # compute the data reported in Tables 2-4
+results = "Fig.8" # show the plot given in Fig.8; 
+#results = "Tables2-4" # compute the data reported in Tables 2-4
 
 ###--- Inputs
 
@@ -63,7 +63,10 @@ Aco2 = np.reshape(data_gd_CO2[:,1], (len_gd, 1))
 
 
 ## Contruct temperature
-T = np.linspace(Tmin,Tmax,len_T)
+#len_T = 4
+T = np.sort(np.genfromtxt(fileIn_Temp) + 273.15) #np.linspace(Tmin,Tmax,len_T)
+len_T = len(T)
+print(len_T)
 TT = np.reshape(T, (1, len_T))
 
 ## Check Stefan-Boltzmann law 
@@ -264,7 +267,9 @@ elif (results == "Fig.8"):
     [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(T-273.15,20., 1e3, 0.98, 40.))
     T3 = np.copy(T_SR)
     t3 = np.copy(tau_SR)
-    [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(T-273.15,20., 1e4, 0.98, 40.))
+    #[T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(T-273.15,20., 1e4, 0.98, 40.))
+    [T_SR, tau_SR, T_ThC,tau_ThC,Robs,Robs_ThC] = Ttot(TAU_R(T-273.15,20., 1., 1.06, 10.))
+    print(T_SR/(T-273.15))
     T4 = np.copy(T_SR)
     t4 = np.copy(tau_SR)
     tau_ext = tau_ext_aus[1] #0.86
