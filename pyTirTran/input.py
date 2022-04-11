@@ -20,5 +20,3 @@ fileIn_gasdataH2O = 'spectralData/h2o_conv.dat'
 fileIn_gasdataCO2 = 'spectralData/co2_conv.dat'
 # Spectral response file
 fileIn_SpR = '../spectralData/sr_calibrated.dat'
-
-
